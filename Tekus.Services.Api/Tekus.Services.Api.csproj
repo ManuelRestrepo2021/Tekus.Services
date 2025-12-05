@@ -6,10 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- Paquetes NuGet -->
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.*" />
   </ItemGroup>
 
+  <!-- Referencias a otros proyectos de la solución -->
   <ItemGroup>
     <ProjectReference Include="..\Tekus.Services.Application\Tekus.Services.Application.csproj" />
     <ProjectReference Include="..\Tekus.Services.Infrastructure\Tekus.Services.Infrastructure.csproj" />

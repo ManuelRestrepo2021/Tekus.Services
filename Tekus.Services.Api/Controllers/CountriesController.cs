@@ -1,11 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Tekus.Services.Application.Dtos;
 using Tekus.Services.Application.Interfaces;
 
 namespace Tekus.Services.Api.Controllers
 {
+    /// <summary>
+    /// Controlador para la gestión de países (Country).
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Requiere token JWT válido para acceder a cualquier acción
     public class CountriesController : ControllerBase
     {
         private readonly ICountryService _countryService;
@@ -15,6 +20,9 @@ namespace Tekus.Services.Api.Controllers
             _countryService = countryService;
         }
 
+        /// <summary>
+        /// Obtiene una lista paginada de países, con soporte para búsqueda y ordenamiento.
+        /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(PagedResult<CountryDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<PagedResult<CountryDto>>> GetAllAsync(
@@ -28,6 +36,9 @@ namespace Tekus.Services.Api.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Obtiene un país por su identificador.
+        /// </summary>
         [HttpGet("{id:int}")]
         [ProducesResponseType(typeof(CountryDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -42,6 +53,9 @@ namespace Tekus.Services.Api.Controllers
             return Ok(country);
         }
 
+        /// <summary>
+        /// Crea un nuevo país.
+        /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(CountryDto), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -60,6 +74,9 @@ namespace Tekus.Services.Api.Controllers
                 created);
         }
 
+        /// <summary>
+        /// Actualiza un país existente.
+        /// </summary>
         [HttpPut("{id:int}")]
         [ProducesResponseType(typeof(CountryDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -80,6 +97,9 @@ namespace Tekus.Services.Api.Controllers
             return Ok(updated);
         }
 
+        /// <summary>
+        /// Elimina un país por su identificador.
+        /// </summary>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

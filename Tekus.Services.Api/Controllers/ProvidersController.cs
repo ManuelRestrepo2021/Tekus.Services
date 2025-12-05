@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Tekus.Services.Application.Dtos;
 using Tekus.Services.Application.Interfaces;
@@ -9,6 +10,7 @@ namespace Tekus.Services.Api.Controllers
     /// </summary>
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize] // Requiere token JWT válido para acceder a cualquier acción
     public class ProvidersController : ControllerBase
     {
         private readonly IProviderService _providerService;
@@ -19,16 +21,16 @@ namespace Tekus.Services.Api.Controllers
         }
 
         /// <summary>
-        /// Obtiene todos los proveedores.
+        /// Obtiene todos los proveedores (paginado, con búsqueda y ordenamiento).
         /// </summary>
         [HttpGet]
         [ProducesResponseType(typeof(PagedResult<ProviderDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<PagedResult<ProviderDto>>> GetAllAsync(
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 10,
-        [FromQuery] string? search = null,
-        [FromQuery] string? sortField = null,
-        [FromQuery] string? sortDir = null)
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortField = null,
+            [FromQuery] string? sortDir = null)
         {
             var result = await _providerService.GetAllAsync(page, pageSize, search, sortField, sortDir);
             return Ok(result);

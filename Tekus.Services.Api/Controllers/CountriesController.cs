@@ -14,10 +14,12 @@ namespace Tekus.Services.Api.Controllers
     public class CountriesController : ControllerBase
     {
         private readonly ICountryService _countryService;
+        private readonly IExternalCountryService _externalCountryService;
 
-        public CountriesController(ICountryService countryService)
+        public CountriesController(ICountryService countryService, IExternalCountryService externalCountryService)
         {
             _countryService = countryService;
+            _externalCountryService = externalCountryService;
         }
 
         /// <summary>
@@ -112,6 +114,17 @@ namespace Tekus.Services.Api.Controllers
             }
 
             return NoContent();
+        }
+
+        /// <summary>
+        /// Obtiene la lista de países desde el servicio externo (simulado/real).
+        /// </summary>
+        [HttpGet("external")]
+        [ProducesResponseType(typeof(IReadOnlyList<ExternalCountryDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<IReadOnlyList<ExternalCountryDto>>> GetExternalCountriesAsync()
+        {
+            var countries = await _externalCountryService.GetCountriesAsync();
+            return Ok(countries);
         }
     }
 }

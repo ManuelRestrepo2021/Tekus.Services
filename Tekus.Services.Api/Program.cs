@@ -34,6 +34,8 @@ namespace Tekus.Services.Api
             builder.Services.AddScoped<ICountryService, CountryService>();
             builder.Services.AddScoped<IReportService, ReportService>();
             builder.Services.AddScoped<IAuthService, AuthService>();
+            // Nuevo: servicio externo de países (simulado)
+            builder.Services.AddScoped<IExternalCountryService, ExternalCountryService>();
 
             // -------------------------------
             // Configuración JWT (autenticación)

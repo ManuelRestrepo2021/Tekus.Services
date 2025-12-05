@@ -19,17 +19,101 @@ namespace Tekus.Services.Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public async Task<IReadOnlyList<ProviderDto>> GetAllAsync()
+        /// <summary>
+        /// Obtiene una lista paginada de proveedores, con soporte para búsqueda y ordenamiento.
+        /// </summary>
+        /// <param name="page">Número de página (1‑based).</param>
+        /// <param name="pageSize">Tamaño de página (registros por página).</param>
+        /// <param name="search">Texto de búsqueda opcional (Name, Nit, Email).</param>
+        /// <param name="sortField">Campo de ordenamiento ("name", "nit", "email", "country").</param>
+        /// <param name="sortDir">Dirección de ordenamiento ("asc" o "desc").</param>
+        public async Task<PagedResult<ProviderDto>> GetAllAsync(
+            int page,
+            int pageSize,
+            string? search,
+            string? sortField,
+            string? sortDir)
         {
-            var providers = await _dbContext.Providers
+            // Query base con las relaciones necesarias
+            var query = _dbContext.Providers
                 .Include(p => p.Country)
                 .Include(p => p.Services)
                 .Include(p => p.CustomFields)
+                .AsQueryable();
+
+            // ------------------------
+            // Filtro de búsqueda
+            // ------------------------
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+
+                query = query.Where(p =>
+                    p.Name.ToLower().Contains(search) ||
+                    p.Nit.ToLower().Contains(search) ||
+                    p.Email.ToLower().Contains(search));
+            }
+
+            // Contar total antes de paginar
+            var totalCount = await query.CountAsync();
+
+            // ------------------------
+            // Ordenamiento
+            // ------------------------
+            bool descending = string.Equals(sortDir, "desc", StringComparison.OrdinalIgnoreCase);
+            var field = (sortField ?? string.Empty).ToLower();
+
+            query = field switch
+            {
+                "name" => descending
+                    ? query.OrderByDescending(p => p.Name)
+                    : query.OrderBy(p => p.Name),
+
+                "nit" => descending
+                    ? query.OrderByDescending(p => p.Nit)
+                    : query.OrderBy(p => p.Nit),
+
+                "email" => descending
+                    ? query.OrderByDescending(p => p.Email)
+                    : query.OrderBy(p => p.Email),
+
+                "country" or "countryname" => descending
+                    ? query.OrderByDescending(p => p.Country!.Name)
+                    : query.OrderBy(p => p.Country!.Name),
+
+                _ => query.OrderBy(p => p.Id) // Orden por defecto
+            };
+
+            // ------------------------
+            // Normalizar paginación
+            // ------------------------
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            var skip = (page - 1) * pageSize;
+
+            // ------------------------
+            // Ejecutar query paginada
+            // ------------------------
+            var providers = await query
+                .Skip(skip)
+                .Take(pageSize)
                 .ToListAsync();
 
-            return providers.Select(MapToDto).ToList();
+            var items = providers.Select(MapToDto).ToList();
+
+            return new PagedResult<ProviderDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
+        /// <summary>
+        /// Obtiene un proveedor por su identificador.
+        /// </summary>
         public async Task<ProviderDto?> GetByIdAsync(int id)
         {
             var provider = await _dbContext.Providers
@@ -41,6 +125,9 @@ namespace Tekus.Services.Infrastructure.Services
             return provider is null ? null : MapToDto(provider);
         }
 
+        /// <summary>
+        /// Crea un nuevo proveedor.
+        /// </summary>
         public async Task<ProviderDto> CreateAsync(ProviderUpsertDto dto)
         {
             var provider = new Provider
@@ -85,6 +172,9 @@ namespace Tekus.Services.Infrastructure.Services
             return MapToDto(provider);
         }
 
+        /// <summary>
+        /// Actualiza un proveedor existente.
+        /// </summary>
         public async Task<ProviderDto?> UpdateAsync(int id, ProviderUpsertDto dto)
         {
             var provider = await _dbContext.Providers
@@ -141,6 +231,9 @@ namespace Tekus.Services.Infrastructure.Services
             return MapToDto(provider);
         }
 
+        /// <summary>
+        /// Elimina un proveedor por su identificador.
+        /// </summary>
         public async Task<bool> DeleteAsync(int id)
         {
             var provider = await _dbContext.Providers.FindAsync(id);

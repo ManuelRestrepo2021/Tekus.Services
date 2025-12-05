@@ -22,11 +22,16 @@ namespace Tekus.Services.Api.Controllers
         /// Obtiene todos los proveedores.
         /// </summary>
         [HttpGet]
-        [ProducesResponseType(typeof(IReadOnlyList<ProviderDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IReadOnlyList<ProviderDto>>> GetAllAsync()
+        [ProducesResponseType(typeof(PagedResult<ProviderDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PagedResult<ProviderDto>>> GetAllAsync(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? search = null,
+        [FromQuery] string? sortField = null,
+        [FromQuery] string? sortDir = null)
         {
-            var providers = await _providerService.GetAllAsync();
-            return Ok(providers);
+            var result = await _providerService.GetAllAsync(page, pageSize, search, sortField, sortDir);
+            return Ok(result);
         }
 
         /// <summary>

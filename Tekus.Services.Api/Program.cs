@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Tekus.Services.Application.Interfaces;
 using Tekus.Services.Infrastructure.Persistence;
 using Tekus.Services.Infrastructure.Services;
+using Tekus.Services.Application.Interfaces;
+using Tekus.Services.Infrastructure.Services;
 
 namespace Tekus.Services.Api
 {
@@ -33,6 +35,9 @@ namespace Tekus.Services.Api
             // Swagger / OpenAPI
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+            builder.Services.AddScoped<IProviderService, ProviderService>();
+            builder.Services.AddScoped<IServiceService, ServiceService>();
+            builder.Services.AddScoped<ICountryService, CountryService>();
 
             var app = builder.Build();
 

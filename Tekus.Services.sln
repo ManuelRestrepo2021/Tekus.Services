@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tekus.Services.Application"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tekus.Services.Infrastructure", "Tekus.Services.Infrastructure\Tekus.Services.Infrastructure.csproj", "{3FF9575D-8B8B-4509-A95A-C4D6B76A0FD1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tekus.Services.Tests", "Tekus.Services.Tests\Tekus.Services.Tests.csproj", "{B4CB811E-0120-44FC-8FBB-821BAB25D1FB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{3FF9575D-8B8B-4509-A95A-C4D6B76A0FD1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3FF9575D-8B8B-4509-A95A-C4D6B76A0FD1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3FF9575D-8B8B-4509-A95A-C4D6B76A0FD1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B4CB811E-0120-44FC-8FBB-821BAB25D1FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B4CB811E-0120-44FC-8FBB-821BAB25D1FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B4CB811E-0120-44FC-8FBB-821BAB25D1FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B4CB811E-0120-44FC-8FBB-821BAB25D1FB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

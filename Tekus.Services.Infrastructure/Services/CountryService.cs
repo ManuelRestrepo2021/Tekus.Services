@@ -18,10 +18,66 @@ namespace Tekus.Services.Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public async Task<IReadOnlyList<CountryDto>> GetAllAsync()
+        /// <summary>
+        /// Obtiene una lista paginada de países, con soporte para búsqueda y ordenamiento.
+        /// </summary>
+        public async Task<PagedResult<CountryDto>> GetAllAsync(
+            int page,
+            int pageSize,
+            string? search,
+            string? sortField,
+            string? sortDir)
         {
-            var countries = await _dbContext.Countries.AsNoTracking().ToListAsync();
-            return countries.Select(MapToDto).ToList();
+            var query = _dbContext.Countries.AsQueryable();
+
+            // Búsqueda: por nombre o IsoCode
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(c =>
+                    c.Name.ToLower().Contains(search) ||
+                    c.IsoCode.ToLower().Contains(search));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            // Ordenamiento
+            bool descending = string.Equals(sortDir, "desc", StringComparison.OrdinalIgnoreCase);
+            var field = (sortField ?? string.Empty).ToLower();
+
+            query = field switch
+            {
+                "name" => descending
+                    ? query.OrderByDescending(c => c.Name)
+                    : query.OrderBy(c => c.Name),
+
+                "isocode" => descending
+                    ? query.OrderByDescending(c => c.IsoCode)
+                    : query.OrderBy(c => c.IsoCode),
+
+                _ => query.OrderBy(c => c.Id)
+            };
+
+            // Paginación
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            var skip = (page - 1) * pageSize;
+
+            var countries = await query
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var items = countries.Select(MapToDto).ToList();
+
+            return new PagedResult<CountryDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
         public async Task<CountryDto?> GetByIdAsync(int id)
@@ -73,6 +129,9 @@ namespace Tekus.Services.Infrastructure.Services
             return true;
         }
 
+        /// <summary>
+        /// Mapea una entidad Country a un DTO CountryDto.
+        /// </summary>
         private static CountryDto MapToDto(Country country) =>
             new()
             {

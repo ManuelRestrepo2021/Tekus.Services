@@ -18,10 +18,66 @@ namespace Tekus.Services.Infrastructure.Services
             _dbContext = dbContext;
         }
 
-        public async Task<IReadOnlyList<ServiceDto>> GetAllAsync()
+        /// <summary>
+        /// Obtiene una lista paginada de servicios, con soporte para búsqueda y ordenamiento.
+        /// </summary>
+        public async Task<PagedResult<ServiceDto>> GetAllAsync(
+            int page,
+            int pageSize,
+            string? search,
+            string? sortField,
+            string? sortDir)
         {
-            var services = await _dbContext.Services.AsNoTracking().ToListAsync();
-            return services.Select(MapToDto).ToList();
+            var query = _dbContext.Services.AsQueryable();
+
+            // Búsqueda: por nombre o descripción
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
+                query = query.Where(s =>
+                    s.Name.ToLower().Contains(search) ||
+                    (s.Description != null && s.Description.ToLower().Contains(search)));
+            }
+
+            var totalCount = await query.CountAsync();
+
+            // Ordenamiento
+            bool descending = string.Equals(sortDir, "desc", StringComparison.OrdinalIgnoreCase);
+            var field = (sortField ?? string.Empty).ToLower();
+
+            query = field switch
+            {
+                "name" => descending
+                    ? query.OrderByDescending(s => s.Name)
+                    : query.OrderBy(s => s.Name),
+
+                "hourlyrate" => descending
+                    ? query.OrderByDescending(s => s.HourlyRate)
+                    : query.OrderBy(s => s.HourlyRate),
+
+                _ => query.OrderBy(s => s.Id)
+            };
+
+            // Paginación
+            if (page <= 0) page = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            var skip = (page - 1) * pageSize;
+
+            var services = await query
+                .Skip(skip)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var items = services.Select(MapToDto).ToList();
+
+            return new PagedResult<ServiceDto>
+            {
+                Items = items,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            };
         }
 
         public async Task<ServiceDto?> GetByIdAsync(int id)
@@ -75,6 +131,9 @@ namespace Tekus.Services.Infrastructure.Services
             return true;
         }
 
+        /// <summary>
+        /// Mapea una entidad Service a un DTO ServiceDto.
+        /// </summary>
         private static ServiceDto MapToDto(Service service) =>
             new()
             {

@@ -16,11 +16,16 @@ namespace Tekus.Services.Api.Controllers
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(IReadOnlyList<CountryDto>), StatusCodes.Status200OK)]
-        public async Task<ActionResult<IReadOnlyList<CountryDto>>> GetAllAsync()
+        [ProducesResponseType(typeof(PagedResult<CountryDto>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<PagedResult<CountryDto>>> GetAllAsync(
+             [FromQuery] int page = 1,
+             [FromQuery] int pageSize = 10,
+             [FromQuery] string? search = null,
+             [FromQuery] string? sortField = null,
+             [FromQuery] string? sortDir = null)
         {
-            var countries = await _countryService.GetAllAsync();
-            return Ok(countries);
+            var result = await _countryService.GetAllAsync(page, pageSize, search, sortField, sortDir);
+            return Ok(result);
         }
 
         [HttpGet("{id:int}")]

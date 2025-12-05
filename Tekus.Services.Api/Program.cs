@@ -4,6 +4,8 @@ using Tekus.Services.Infrastructure.Persistence;
 using Tekus.Services.Infrastructure.Services;
 using Tekus.Services.Application.Interfaces;
 using Tekus.Services.Infrastructure.Services;
+using Tekus.Services.Application.Interfaces;
+using Tekus.Services.Infrastructure.Services;
 
 namespace Tekus.Services.Api
 {
@@ -38,6 +40,10 @@ namespace Tekus.Services.Api
             builder.Services.AddScoped<IProviderService, ProviderService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
             builder.Services.AddScoped<ICountryService, CountryService>();
+            builder.Services.AddScoped<IProviderService, ProviderService>();
+            builder.Services.AddScoped<IServiceService, ServiceService>();
+            builder.Services.AddScoped<ICountryService, CountryService>();
+            builder.Services.AddScoped<IReportService, ReportService>();
 
             var app = builder.Build();
 
